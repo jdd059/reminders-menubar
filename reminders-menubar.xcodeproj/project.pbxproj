@@ -660,6 +660,7 @@
 				712C32AD24BF939100AC75E2 /* Frameworks */,
 				712C32AE24BF939100AC75E2 /* Resources */,
 				71059DBD25CA5323001F3063 /* CopyFiles */,
+				71DB00013000000100000001 /* Debug Build Metadata */,
 			);
 			buildRules = (
 			);
@@ -758,6 +759,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		71DB00013000000100000001 /* Debug Build Metadata */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = "Debug Build Metadata";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "case \"$CONFIGURATION\" in\n  Debug*) ;;\n  *) exit 0 ;;\nesac\n\ninfo_plist=\"$TARGET_BUILD_DIR/$INFOPLIST_PATH\"\ngit_branch=$(git -C \"$SRCROOT\" symbolic-ref --short -q HEAD || echo detached)\ngit_commit=$(git -C \"$SRCROOT\" rev-parse --short=12 HEAD)\ngit_commit_count=$(git -C \"$SRCROOT\" rev-list --count HEAD)\nbuild_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)\ndevelopment_version=\"${MARKETING_VERSION}-dev.${git_commit_count}\"\n\nfor key in RMBDevelopmentVersion RMBBuildConfiguration RMBGitBranch RMBGitCommit RMBBuildTimestamp; do\n  /usr/libexec/PlistBuddy -c \"Delete :$key\" \"$info_plist\" 2>/dev/null || true\ndone\n\n/usr/libexec/PlistBuddy -c \"Add :RMBDevelopmentVersion string $development_version\" \"$info_plist\"\n/usr/libexec/PlistBuddy -c \"Add :RMBBuildConfiguration string $CONFIGURATION\" \"$info_plist\"\n/usr/libexec/PlistBuddy -c \"Add :RMBGitBranch string $git_branch\" \"$info_plist\"\n/usr/libexec/PlistBuddy -c \"Add :RMBGitCommit string $git_commit\" \"$info_plist\"\n/usr/libexec/PlistBuddy -c \"Add :RMBBuildTimestamp string $build_timestamp\" \"$info_plist\"\n";
+		};
 		7133C87225918BD700F7E0AA /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
