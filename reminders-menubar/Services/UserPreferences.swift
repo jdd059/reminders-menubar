@@ -33,6 +33,7 @@ private enum PreferencesKeys {
     static let showTagsBeforeCalendars = "showTagsBeforeCalendars"
     static let filterTagRemindersByCalendar = "filterTagRemindersByCalendar"
     static let completionAnimationEnabled = "completionAnimationEnabled"
+    static let mainWindowIsDetached = "mainWindowIsDetached"
 }
 
 // TODO: Resolve body length of UserPreferences
@@ -457,5 +458,11 @@ class UserPreferences: ObservableObject {
             let nsSizeData = try? JSONEncoder().encode(newValue)
             UserPreferences.defaults.set(nsSizeData, forKey: PreferencesKeys.mainPopoverSize)
         }
+    }
+
+    // Presentation state is kept separate from the detached window frame, which AppKit autosaves.
+    var mainWindowIsDetached: Bool {
+        get { UserPreferences.defaults.bool(forKey: PreferencesKeys.mainWindowIsDetached) }
+        set { UserPreferences.defaults.set(newValue, forKey: PreferencesKeys.mainWindowIsDetached) }
     }
 }

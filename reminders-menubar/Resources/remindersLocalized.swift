@@ -135,6 +135,9 @@ enum RemindersMenuBarLocalizedKeys: String {
     case completionAnimationSettingsNote
     case showUpcomingReminderListNameOption
     case dragToResizeHelp
+    case detachWindowButton
+    case reattachWindowButton
+    case windowPresentationSettingsLabel
     case popoverSizeSettingsLabel
     case popoverSizeResetToDefaultButton
     case reminderSortingSettingsLabel

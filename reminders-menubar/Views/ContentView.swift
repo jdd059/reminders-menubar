@@ -3,6 +3,7 @@ import EventKit
 
 struct ContentView: View {
     @EnvironmentObject var remindersData: RemindersData
+    @EnvironmentObject var presentationCoordinator: MainPresentationCoordinator
     @ObservedObject var userPreferences = UserPreferences.shared
     @State private var appHasPopoverOpen = false
     @State private var keyMonitor: Any?
@@ -23,7 +24,11 @@ struct ContentView: View {
                 noFilterContent
             }
         }
-        .overlay(PopoverResizeHandleView().padding(4), alignment: .bottomTrailing)
+        .overlay(Group {
+            if !presentationCoordinator.isDetached {
+                PopoverResizeHandleView().padding(4)
+            }
+        }, alignment: .bottomTrailing)
         .modifier(RmbBackgroundModifier())
         .preferredColorScheme(userPreferences.rmbColorScheme.colorScheme)
         .environment(\.appHasPopoverOpen, $appHasPopoverOpen)
@@ -31,8 +36,7 @@ struct ContentView: View {
         .onDisappear { stopKeyMonitor() }
         .onReceive(
             NotificationCenter.default.publisher(
-                for: NSPopover.didCloseNotification,
-                object: AppDelegate.shared.popover
+                for: .mainPresentationDidHide
             )
         ) { _ in
             remindersData.showingSearch = false
@@ -60,13 +64,7 @@ struct ContentView: View {
     }
 
     private func activePopoverWindow(for event: NSEvent) -> NSWindow? {
-        let popover = AppDelegate.shared.popover
-        guard popover.isShown,
-              let window = popover.contentViewController?.view.window,
-              event.window === window else {
-            return nil
-        }
-        return window
+        presentationCoordinator.activeMainWindow(for: event)
     }
 
     private func handlePrintableKey(_ event: NSEvent, popoverWindow: NSWindow) -> Bool {
@@ -93,7 +91,10 @@ struct ContentView: View {
             return true
         }
 
-        AppDelegate.shared.popover.performClose(nil)
+        // A key-capable NSPanel routes Escape through cancelOperation by default, which closes it.
+        // Consume the key when detached so the persistent window remains visible.
+        guard !presentationCoordinator.isDetached else { return true }
+        presentationCoordinator.hideCurrentPresentation()
         return true
     }
 
@@ -235,4 +236,5 @@ struct ListSectionModifier: ViewModifier {
 #Preview {
     ContentView()
         .environmentObject(RemindersData())
+        .environmentObject(MainPresentationCoordinator(popover: NSPopover()))
 }

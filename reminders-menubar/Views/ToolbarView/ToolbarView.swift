@@ -21,6 +21,8 @@ struct ToolbarView: View {
 
             UpdateAvailableButton()
 
+            MainPresentationButton()
+
             OpenSettingButton()
         }
         .padding(.top, 10)
@@ -30,7 +32,31 @@ struct ToolbarView: View {
     }
 }
 
+private struct MainPresentationButton: View {
+    @EnvironmentObject var presentationCoordinator: MainPresentationCoordinator
+
+    var body: some View {
+        Button {
+            if presentationCoordinator.isDetached {
+                AppDelegate.shared.reattachMainWindow()
+            } else {
+                AppDelegate.shared.detachMainWindow()
+            }
+        } label: {
+            ToolbarButtonLabel {
+                Image(systemName: presentationCoordinator.isDetached ? "menubar.arrow.up.rectangle" : "macwindow")
+            }
+        }
+        .modifier(ToolbarButtonModifier())
+        .help(rmbLocalized(presentationCoordinator.isDetached ? .reattachWindowButton : .detachWindowButton))
+        .accessibilityLabel(rmbLocalized(
+            presentationCoordinator.isDetached ? .reattachWindowButton : .detachWindowButton
+        ))
+    }
+}
+
 #Preview {
     ToolbarView()
         .environmentObject(RemindersData())
+        .environmentObject(MainPresentationCoordinator(popover: NSPopover()))
 }

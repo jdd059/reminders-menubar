@@ -5001,6 +5001,39 @@
         }
       }
     },
+    "detachWindowButton" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detach Window"
+          }
+        }
+      }
+    },
+    "reattachWindowButton" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reattach to Menu Bar"
+          }
+        }
+      }
+    },
+    "windowPresentationSettingsLabel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Window Presentation"
+          }
+        }
+      }
+    },
     "dragToResizeHelp" : {
       "extractionState" : "manual",
       "localizations" : {

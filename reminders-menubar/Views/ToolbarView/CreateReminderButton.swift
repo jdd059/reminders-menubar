@@ -23,8 +23,7 @@ struct CreateReminderButton: View {
         .help(rmbLocalized(.newReminderButtonHelp))
         .onReceive(
             NotificationCenter.default.publisher(
-                for: NSPopover.didCloseNotification,
-                object: AppDelegate.shared.popover
+                for: .mainPresentationDidHide
             )
         ) { _ in
             resetCreateReminderSheetState()

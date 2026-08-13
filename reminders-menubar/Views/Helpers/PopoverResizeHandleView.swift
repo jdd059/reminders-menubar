@@ -2,6 +2,7 @@ import SwiftUI
 import AppKit
 
 struct PopoverResizeHandleView: View {
+    @EnvironmentObject var presentationCoordinator: MainPresentationCoordinator
     @State private var isHovering = false
     @State private var isDragging = false
     @State private var dragStartSize: CGSize?
@@ -49,7 +50,7 @@ struct PopoverResizeHandleView: View {
                 .onChanged { value in
                     if dragStartSize == nil {
                         isDragging = true
-                        dragStartSize = AppDelegate.shared.popover.contentSize
+                        dragStartSize = presentationCoordinator.dockedContentSize
                     }
 
                     guard let startSize = dragStartSize else { return }
@@ -57,15 +58,15 @@ struct PopoverResizeHandleView: View {
                         width: startSize.width + value.translation.width,
                         height: startSize.height + value.translation.height
                     )
-                    AppDelegate.shared.setMainPopoverSize(size: newSize)
+                    presentationCoordinator.resizeDockedContent(to: newSize, persist: false)
                 }
                 .onEnded { value in
-                    let startSize = dragStartSize ?? AppDelegate.shared.popover.contentSize
+                    let startSize = dragStartSize ?? presentationCoordinator.dockedContentSize
                     let newSize = NSSize(
                         width: startSize.width + value.translation.width,
                         height: startSize.height + value.translation.height
                     )
-                    AppDelegate.shared.setMainPopoverSize(size: newSize, persist: true)
+                    presentationCoordinator.resizeDockedContent(to: newSize, persist: true)
                     dragStartSize = nil
                     isDragging = false
                 }

@@ -51,13 +51,17 @@ final class FilterPanelController: ObservableObject {
         isVisible = true
 
         // NOTE: Prevent macOS from auto-dismissing the popover when clicking the filter panel.
-        AppDelegate.shared.popover.behavior = .applicationDefined
+        if !AppDelegate.shared.presentationCoordinator.isDetached {
+            AppDelegate.shared.popover.behavior = .applicationDefined
+        }
 
         startEventMonitors()
-        observePopoverClose()
+        if !AppDelegate.shared.presentationCoordinator.isDetached {
+            observePopoverClose()
+        }
     }
 
-    private func close() {
+    func close() {
         closeSubmenu()
         if let panel {
             panel.orderOut(nil)
@@ -66,7 +70,9 @@ final class FilterPanelController: ObservableObject {
         isVisible = false
 
         // NOTE: Restore default popover dismissal behavior.
-        AppDelegate.shared.popover.behavior = .transient
+        if !AppDelegate.shared.presentationCoordinator.isDetached {
+            AppDelegate.shared.popover.behavior = .transient
+        }
 
         stopEventMonitors()
         stopPopoverCloseObserver()

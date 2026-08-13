@@ -29,6 +29,22 @@ final class RightClickMenuHelper: NSObject {
 
         menu.addItem(.separator())
 
+        if AppDelegate.shared.presentationCoordinator.isDetached {
+            menu.addItem(makeMenuItem(
+                title: rmbLocalized(.reattachWindowButton),
+                action: #selector(reattachMainWindow),
+                systemSymbolName: "menubar.arrow.up.rectangle"
+            ))
+        } else {
+            menu.addItem(makeMenuItem(
+                title: rmbLocalized(.detachWindowButton),
+                action: #selector(detachMainWindow),
+                systemSymbolName: "macwindow"
+            ))
+        }
+
+        menu.addItem(.separator())
+
         if UpdateController.shared.isOutdated {
             menu.addItem(makeMenuItem(
                 title: rmbLocalized(.updateAvailableNoticeButton),
@@ -95,6 +111,14 @@ final class RightClickMenuHelper: NSObject {
 
     @objc private func openSettingsAction() {
         NSApp.openAppSettings()
+    }
+
+    @objc private func detachMainWindow() {
+        AppDelegate.shared.detachMainWindow()
+    }
+
+    @objc private func reattachMainWindow() {
+        AppDelegate.shared.reattachMainWindow()
     }
 
     @objc private func checkForUpdates() {

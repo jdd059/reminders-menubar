@@ -2,6 +2,13 @@ import SwiftUI
 
 struct GeneralSettingsTab: View {
     @ObservedObject var userPreferences = UserPreferences.shared
+    @ObservedObject private var presentationCoordinator: MainPresentationCoordinator
+
+    init(presentationCoordinator: MainPresentationCoordinator? = nil) {
+        _presentationCoordinator = ObservedObject(
+            wrappedValue: presentationCoordinator ?? AppDelegate.shared.presentationCoordinator
+        )
+    }
 
     var body: some View {
         Form {
@@ -10,6 +17,22 @@ struct GeneralSettingsTab: View {
                     rmbLocalized(.launchAtLoginOption),
                     isOn: $userPreferences.launchAtLoginIsEnabled
                 )
+            }
+
+            SettingsDivider()
+
+            SettingsSection(rmbLocalized(.windowPresentationSettingsLabel)) {
+                Button {
+                    if presentationCoordinator.isDetached {
+                        AppDelegate.shared.reattachMainWindow()
+                    } else {
+                        AppDelegate.shared.detachMainWindow()
+                    }
+                } label: {
+                    Text(rmbLocalized(
+                        presentationCoordinator.isDetached ? .reattachWindowButton : .detachWindowButton
+                    ))
+                }
             }
 
             SettingsDivider()
@@ -80,5 +103,5 @@ struct GeneralSettingsTab: View {
 }
 
 #Preview {
-    GeneralSettingsTab()
+    GeneralSettingsTab(presentationCoordinator: MainPresentationCoordinator(popover: NSPopover()))
 }
