@@ -6,6 +6,7 @@ import EventKit
 class RemindersData: ObservableObject {
     private var cancellationTokens: [AnyCancellable] = []
     private let previewService = MenuBarPreviewService()
+    private var updateGeneration = 0
 
     init() {
         addObservers()
@@ -242,6 +243,9 @@ class RemindersData: ObservableObject {
     }
 
     func update() async {
+        updateGeneration &+= 1
+        let generation = updateGeneration
+
         // Validate filter — remove stale calendars that no longer exist
         let calendars = RemindersService.shared.getCalendars()
         let calendarsSet = Set(calendars.map({ $0.calendarIdentifier }))
@@ -252,24 +256,38 @@ class RemindersData: ObservableObject {
         // Validate filter — remove stale tags that no longer exist
         if #available(macOS 12, *) {
             let tags = await RemindersService.shared.getAllTags()
+            guard generation == updateGeneration else { return }
             self.availableTags = tags
             self.tagsFilter = self.tagsFilter.filter({ tags.contains($0) })
             TagParser.updateShared(with: tags)
         }
 
         // Fetch reminder data with validated filters
-        self.filteredCalendarReminderLists =
+        let calendarReminderLists =
             await RemindersService.shared.getReminders(of: self.calendarIdentifiersFilter)
-        self.upcomingReminders = await getUpcomingReminders()
-        self.filteredTagReminderLists = await getTagReminders()
+        guard generation == updateGeneration else { return }
+        self.filteredCalendarReminderLists = calendarReminderLists
+
+        let upcomingReminders = await getUpcomingReminders()
+        guard generation == updateGeneration else { return }
+        self.upcomingReminders = upcomingReminders
+
+        let tagReminderLists = await getTagReminders()
+        guard generation == updateGeneration else { return }
+        self.filteredTagReminderLists = tagReminderLists
 
         // Update menu bar
-        self.updateMenuBarCount(to: await getMenuBarCount())
+        let menuBarCount = await getMenuBarCount()
+        guard generation == updateGeneration else { return }
+        self.updateMenuBarCount(to: menuBarCount)
         await self.refreshPreview()
+        guard generation == updateGeneration else { return }
 
         // Update search data
         if showingRecentReminders {
-            self.recentReminders = await fetchRecentReminders()
+            let recentReminders = await fetchRecentReminders()
+            guard generation == updateGeneration else { return }
+            self.recentReminders = recentReminders
         }
     }
     

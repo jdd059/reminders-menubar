@@ -116,7 +116,10 @@ private struct SettingsOpenerHiddenWindow: NSViewRepresentable {
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
+            stopObservingApplicationActivation()
             applyHiddenBehavior()
+            guard window != nil else { return }
+
             // Re-apply whenever app becomes active (covers activation policy resets)
             observer = NotificationCenter.default.addObserver(
                 forName: NSApplication.didBecomeActiveNotification,
@@ -127,6 +130,12 @@ private struct SettingsOpenerHiddenWindow: NSViewRepresentable {
             }
         }
 
+        private func stopObservingApplicationActivation() {
+            guard let observer else { return }
+            NotificationCenter.default.removeObserver(observer)
+            self.observer = nil
+        }
+
         private func applyHiddenBehavior() {
             guard let window else { return }
             window.collectionBehavior.insert([.ignoresCycle, .transient])
@@ -134,9 +143,7 @@ private struct SettingsOpenerHiddenWindow: NSViewRepresentable {
         }
 
         deinit {
-            if let observer {
-                NotificationCenter.default.removeObserver(observer)
-            }
+            stopObservingApplicationActivation()
         }
     }
 }
