@@ -4,6 +4,19 @@ enum AppConstants {
     static let bundleVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
 
     static let displayVersion: String = {
+#if DEBUG
+        let info = Bundle.main.infoDictionary
+        let developmentVersion = info?["RMBDevelopmentVersion"] as? String
+        let configuration = info?["RMBBuildConfiguration"] as? String
+        let branch = info?["RMBGitBranch"] as? String
+        let commit = info?["RMBGitCommit"] as? String
+        let timestamp = info?["RMBBuildTimestamp"] as? String
+
+        if let developmentVersion, let configuration, let branch, let commit, let timestamp {
+            return "v\(developmentVersion) • \(configuration) • \(branch)@\(commit) • \(timestamp)"
+        }
+#endif
+
         guard let bundleVersion else {
             return "-"
         }
