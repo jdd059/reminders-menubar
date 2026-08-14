@@ -7,10 +7,11 @@ struct ContentView: View {
     @ObservedObject var userPreferences = UserPreferences.shared
     @State private var appHasPopoverOpen = false
     @State private var keyMonitor: Any?
+    @State private var mainContentWidth: CGFloat = 0
 
     var body: some View {
         VStack(spacing: 0) {
-            ToolbarView()
+            ToolbarView(availableWidth: mainContentWidth)
 
             if remindersData.availableCalendars.isEmpty {
                 emptyStateContent
@@ -29,6 +30,12 @@ struct ContentView: View {
                 PopoverResizeHandleView().padding(4)
             }
         }, alignment: .bottomTrailing)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(key: MainContentWidthPreferenceKey.self, value: proxy.size.width)
+            }
+        )
+        .onPreferenceChange(MainContentWidthPreferenceKey.self) { mainContentWidth = $0 }
         .modifier(RmbBackgroundModifier())
         .preferredColorScheme(userPreferences.rmbColorScheme.colorScheme)
         .environment(\.appHasPopoverOpen, $appHasPopoverOpen)
@@ -203,6 +210,14 @@ struct ContentView: View {
     @ViewBuilder private var noFilterContent: some View {
         NoFilterSelectedView()
             .frame(maxHeight: .infinity)
+    }
+}
+
+private struct MainContentWidthPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 

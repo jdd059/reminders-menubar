@@ -36,7 +36,8 @@
 
 ## Features
 
-* All interactions through the macOS menu bar
+* Quick access through the macOS menu bar, global shortcut, or floating window
+* Detach reminders into a persistent floating window when desired
 * Keep everything in sync with Apple Reminders
 * Create new reminders using natural language for due dates, lists, and tags
 * Mark as completed or edit due dates, priorities, recurrences, lists, tags, and more

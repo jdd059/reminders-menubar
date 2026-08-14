@@ -1,11 +1,20 @@
 import SwiftUI
 
 struct ToolbarView: View {
+    private static let keyboardShortcutMinimumWidth: CGFloat = 300
+
     @EnvironmentObject var remindersData: RemindersData
+    let availableWidth: CGFloat
+
+    init(availableWidth: CGFloat = .infinity) {
+        self.availableWidth = availableWidth
+    }
 
     var body: some View {
         HStack(spacing: 4) {
-            CreateReminderButton()
+            CreateReminderButton(
+                showsKeyboardShortcut: availableWidth == 0 || availableWidth >= Self.keyboardShortcutMinimumWidth
+            )
                 .disabled(remindersData.availableCalendars.isEmpty)
 
             Spacer()

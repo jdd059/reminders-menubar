@@ -3,6 +3,11 @@ import SwiftUI
 struct CreateReminderButton: View {
     @EnvironmentObject var remindersData: RemindersData
     @State private var showingCreateView = false
+    let showsKeyboardShortcut: Bool
+
+    init(showsKeyboardShortcut: Bool = true) {
+        self.showsKeyboardShortcut = showsKeyboardShortcut
+    }
 
     var body: some View {
         Button {
@@ -11,9 +16,13 @@ struct CreateReminderButton: View {
             ToolbarButtonLabel {
                 HStack {
                     Image(rmbSymbol: .plus)
-                    Text(String("⌘N"))
-                        .foregroundColor(.secondary)
-                        .font(.footnote)
+                    if showsKeyboardShortcut {
+                        Text(String("⌘N"))
+                            .foregroundColor(.secondary)
+                            .font(.footnote)
+                            .lineLimit(1)
+                            .fixedSize()
+                    }
                 }
                 .padding(.trailing, 2)
             }

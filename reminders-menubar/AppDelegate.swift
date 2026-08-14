@@ -138,7 +138,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func configureKeyboardShortcut() {
         KeyboardShortcutService.shared.action(for: .openRemindersMenuBar) { [weak self] in
-            self?.toggleMainPresentation()
+            self?.showMainPresentation()
         }
     }
 
@@ -172,6 +172,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else if popover.isShown || didCloseEventDate.elapsedTimeInterval < 0.01 {
             didCloseEventDate = .distantPast
             popover.performClose(button)
+        } else {
+            presentationCoordinator.showDocked(relativeTo: button)
+        }
+    }
+
+    private func showMainPresentation() {
+        guard RemindersService.shared.isAuthorized else {
+            requestAuthorization()
+            return
+        }
+
+        ensureMainContentConfigured()
+        guard let button = statusBarItem.button else { return }
+
+        if presentationCoordinator.isDetached {
+            presentationCoordinator.showDetached()
         } else {
             presentationCoordinator.showDocked(relativeTo: button)
         }
@@ -469,6 +485,9 @@ final class MainPresentationCoordinator: NSObject, ObservableObject, NSWindowDel
         panel.level = .floating
         panel.hidesOnDeactivate = false
         panel.isReleasedWhenClosed = false
+        if #available(macOS 13.0, *) {
+            panel.collectionBehavior.insert(.canJoinAllApplications)
+        }
         panel.minSize = MainPopoverSizing.minSize
         panel.maxSize = MainPopoverSizing.maxSize
         panel.delegate = self
