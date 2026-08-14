@@ -138,7 +138,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func configureKeyboardShortcut() {
         KeyboardShortcutService.shared.action(for: .openRemindersMenuBar) { [weak self] in
-            self?.showMainPresentation()
+            self?.toggleMainPresentation()
         }
     }
 
@@ -147,7 +147,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if event.type == .rightMouseUp {
             showRightClickMenu()
         } else {
-            toggleMainPresentation()
+            toggleMainPresentation(suppressReopenAfterRecentPopoverClose: true)
         }
     }
 
@@ -158,7 +158,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusBarItem.menu = nil
     }
 
-    @objc private func toggleMainPresentation() {
+    private func toggleMainPresentation(suppressReopenAfterRecentPopoverClose: Bool = false) {
         guard RemindersService.shared.isAuthorized else {
             requestAuthorization()
             return
@@ -167,26 +167,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ensureMainContentConfigured()
         guard let button = statusBarItem.button else { return }
 
-        if presentationCoordinator.isDetached {
-            presentationCoordinator.showDetached()
-        } else if popover.isShown || didCloseEventDate.elapsedTimeInterval < 0.01 {
+        if presentationCoordinator.isDetachedPresentationVisible || popover.isShown {
+            presentationCoordinator.hideCurrentPresentation()
+        } else if suppressReopenAfterRecentPopoverClose && didCloseEventDate.elapsedTimeInterval < 0.01 {
             didCloseEventDate = .distantPast
-            popover.performClose(button)
-        } else {
-            presentationCoordinator.showDocked(relativeTo: button)
-        }
-    }
-
-    private func showMainPresentation() {
-        guard RemindersService.shared.isAuthorized else {
-            requestAuthorization()
-            return
-        }
-
-        ensureMainContentConfigured()
-        guard let button = statusBarItem.button else { return }
-
-        if presentationCoordinator.isDetached {
+        } else if presentationCoordinator.isDetached {
             presentationCoordinator.showDetached()
         } else {
             presentationCoordinator.showDocked(relativeTo: button)
@@ -426,6 +411,9 @@ final class MainPresentationCoordinator: NSObject, ObservableObject, NSWindowDel
         guard isDetached else { return }
         attachToDetachedPanel()
         NSApp.activate(ignoringOtherApps: true)
+        if detachedPanel?.isMiniaturized == true {
+            detachedPanel?.deminiaturize(nil)
+        }
         detachedPanel?.makeKeyAndOrderFront(nil)
     }
 
@@ -452,6 +440,10 @@ final class MainPresentationCoordinator: NSObject, ObservableObject, NSWindowDel
 
     var dockedContentSize: NSSize {
         popover.contentSize
+    }
+
+    var isDetachedPresentationVisible: Bool {
+        detachedPanel?.isVisible == true && detachedPanel?.isMiniaturized == false
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
